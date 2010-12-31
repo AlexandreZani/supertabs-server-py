@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MySQLDB name="SupertabsDB">
+  <table name="Users">
+    <field name="UserName" unique="true" indexed="true" type="VARCHAR(255)" />
+    <field name="SaltedPassword" type="VARCHAR(255)" description="SHA256(Password,Salt)" />
+    <field name="PasswordSalt" type="VARCHAR(255)" />
+    <field name="EncryptedUserId" type="VARCHAR(255)" />
+    <field name="UserIdSalt" type="VARCHAR(255)" />
+  </table>
+    
+  <table name="Sessions">
+    <field name="SessionId" indexed="true" unique="true" type="VARCHAR(255)" />
+    <field name="IP" type="VARCHAR(255)" />
+    <field name="UserId" type="VARCHAR(255)" />
+    <field name="LastTouched" type="BIGINT" />
+  </table>
+
+  <table name="Tabs">
+    <field name="UserId" type="VARCHAR(255)" indexed="true" description="XOR(SHA256(Password,UserIdSalt)EncryptedUserId)" />
+    <field name="TabId" type="INT" />
+    <field name="SupertabId" type="INT" />
+    <field name="Url" type="VARCHAR(255)" />
+  </table>
+</MySQLDB>
