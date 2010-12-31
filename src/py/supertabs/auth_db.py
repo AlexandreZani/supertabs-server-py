@@ -31,6 +31,17 @@ class User(object):
       self.salted_password = binascii.unhexlify(password)
       self.encrypted_uid = binascii.unhexlify(uid)
 
+  def changePassword(self, old_password, new_password):
+    if not self.checkPassword(old_password):
+      raise Exception("WrongPassword")
+    uid = self.getUserId(old_password)
+    self.setPassword(new_password)
+    self.setUserId(binascii.unhexlify(uid), new_password)
+
+  def clone(self):
+    return User(self.getEncryptedUserId(), self.username,
+        self.getSaltedPassword(), self.getUserIdSalt(), self.getPasswordSalt())
+
   def setPassword(self, new_password):
     self.password_salt = os.urandom(256/8)
     self.salted_password = self.saltPassword(new_password, self.password_salt)
@@ -90,3 +101,9 @@ class User(object):
 
   def __ne__(self, right):
     return not self == right
+
+
+class AuthDB(object):
+  def writeUser(self, username): pass
+  def getUser(self, username): pass
+  def deleteUser(self, username): pass

@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 from supertabs.auth_db import *
+from tests.mock_auth_db import *
 import binascii
 
 class TestUser(object):
@@ -56,9 +57,60 @@ class TestUser(object):
     user = User(uid, "username", "password")
     user2 = User(uid, "username", "password2")
 
-
     assert user != user2
 
+  def test_changePassword(self):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, "username", "password")
 
+    user.changePassword("password", "new_pass")
 
+    assert user.checkPassword("new_pass")
+    assert uid == user.getUserId("new_pass")
 
+def pytest_generate_tests(metafunc):
+  if 'db' in metafunc.funcargnames:
+    metafunc.addcall(param=1)
+
+def pytest_funcarg__db(request):
+  if request.param == 1:
+    return MockAuthDB()
+
+class TestAuthDB(object):
+  def test_writeUser(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, "username", "password")
+
+    db.writeUser(user)
+    
+    user2 = db.getUser("username")
+    
+    assert user == user2
+
+  def test_changeUser(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, "username", "password")
+
+    db.writeUser(user)
+    user.changePassword("password", "new_pass")
+    db.writeUser(user)
+    
+    user2 = db.getUser("username")
+    
+    assert user == user2
+
+  def test_writeUserNone(self, db):
+    user = db.getUser("username")
+    
+    assert None == user
+
+  def test_deleteUser(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, "username", "password")
+
+    db.writeUser(user)
+    assert db.deleteUser("username")
+
+    user2 = db.getUser("username")
+
+    assert None == user2
