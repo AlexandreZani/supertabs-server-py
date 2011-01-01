@@ -41,11 +41,11 @@ class TestUser(object):
     uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
     user = User(uid, "username", "password")
 
-    euid = user.getEncryptedUserId()
-    spass = user.getSaltedPassword()
+    euid = user.encrypted_uid
+    spass = user.salted_password
     username = user.username
-    uid_salt = user.getUserIdSalt()
-    pass_salt = user.getPasswordSalt()
+    uid_salt = user.uid_salt
+    pass_salt = user.password_salt
 
     user2 = User(euid, username, spass, uid_salt, pass_salt)
 
@@ -58,6 +58,12 @@ class TestUser(object):
     user2 = User(uid, "username", "password2")
 
     assert user != user2
+
+  def test_clone(self):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, "username", "password")
+
+    assert user == user.clone()
 
   def test_changePassword(self):
     uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"

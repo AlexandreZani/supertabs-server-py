@@ -27,10 +27,42 @@ class User(object):
       self.username = username
     else:
       self.username = username
-      self.password_salt = binascii.unhexlify(password_salt)
-      self.uid_salt = binascii.unhexlify(uid_salt)
-      self.salted_password = binascii.unhexlify(password)
-      self.encrypted_uid = binascii.unhexlify(uid)
+      self.password_salt = password_salt
+      self.uid_salt = uid_salt
+      self.salted_password = password
+      self.encrypted_uid = uid
+
+  @property
+  def password_salt(self):
+    return binascii.hexlify(self.__password_salt)
+
+  @password_salt.setter
+  def password_salt(self, val):
+    self.__password_salt = binascii.unhexlify(val)
+
+  @property
+  def uid_salt(self):
+    return binascii.hexlify(self.__uid_salt)
+
+  @uid_salt.setter
+  def uid_salt(self, val):
+    self.__uid_salt = binascii.unhexlify(val)
+
+  @property
+  def encrypted_uid(self):
+    return binascii.hexlify(self.__encrypted_uid)
+
+  @encrypted_uid.setter
+  def encrypted_uid(self, val):
+    self.__encrypted_uid = binascii.unhexlify(val)
+
+  @property
+  def salted_password(self):
+    return binascii.hexlify(self.__salted_password)
+
+  @salted_password.setter
+  def salted_password(self, val):
+    self.__salted_password = binascii.unhexlify(val)
 
   def changePassword(self, old_password, new_password):
     if not self.checkPassword(old_password):
@@ -40,12 +72,12 @@ class User(object):
     self.setUserId(binascii.unhexlify(uid), new_password)
 
   def clone(self):
-    return User(self.getEncryptedUserId(), self.username,
-        self.getSaltedPassword(), self.getUserIdSalt(), self.getPasswordSalt())
+    return User(self.encrypted_uid, self.username,
+        self.salted_password, self.uid_salt, self.password_salt)
 
   def setPassword(self, new_password):
-    self.password_salt = os.urandom(256/8)
-    self.salted_password = self.saltPassword(new_password, self.password_salt)
+    self.__password_salt = os.urandom(256/8)
+    self.__salted_password = self.saltPassword(new_password, self.__password_salt)
 
   def saltPassword(self, password, salt):
     sha256 = hashlib.sha256()
@@ -54,27 +86,16 @@ class User(object):
     return sha256.hexdigest()
 
   def checkPassword(self, password):
-    test_password = self.saltPassword(password, self.password_salt)
-    return test_password == self.salted_password
+    test_password = self.saltPassword(password, self.__password_salt)
+    return test_password == self.__salted_password
 
   def setUserId(self, uid, password):
-    self.uid_salt = os.urandom(256/8)
-    self.encrypted_uid = self.encryptUserId(uid, password, self.uid_salt)
+    self.__uid_salt = os.urandom(256/8)
+    self.__encrypted_uid = self.encryptUserId(uid, password, self.__uid_salt)
 
   def getUserId(self, password):
-    return binascii.hexlify(self.encryptUserId(self.encrypted_uid, password, self.uid_salt))
-
-  def getSaltedPassword(self):
-    return binascii.hexlify(self.salted_password)
-
-  def getEncryptedUserId(self):
-    return binascii.hexlify(self.encrypted_uid)
-
-  def getUserIdSalt(self):
-    return binascii.hexlify(self.uid_salt)
-
-  def getPasswordSalt(self):
-    return binascii.hexlify(self.password_salt)
+    return binascii.hexlify(self.encryptUserId(self.__encrypted_uid, password,
+      self.__uid_salt))
 
   def encryptUserId(self, uid, password, uid_salt):
     sha256 = hashlib.sha256()
