@@ -17,6 +17,7 @@
 import hashlib
 import os
 import binascii
+import time
 
 class User(object):
   def __init__(self, uid, username, password, uid_salt = None, password_salt = None):
@@ -102,6 +103,61 @@ class User(object):
   def __ne__(self, right):
     return not self == right
 
+class Session(object):
+  def __init__(self, uid, sid = None, last_touched = None):
+    self.uid = uid
+    if sid == None:
+      self.__sid = os.urandom(256/8)
+    else:
+      self.sid = sid
+
+    if last_touched == None:
+      self.last_touched = time.time()
+    else:
+      self.last_touched = last_touched
+
+  def clone(self):
+    return Session(self.uid, self.sid, self.last_touched)
+
+  def __eq__(self, right):
+    try:
+      b = (self.uid == right.uid and self.sid == right.sid and
+          self.last_touched == right.last_touched)
+    except Exception:
+      return False
+
+    return b
+
+  def __ne__(self, right):
+    return not self == right
+
+  @property
+  def last_touched(self):
+    return self.__last_session
+
+  @last_touched.setter
+  def last_touched(self, val):
+    self.__last_session = int(val)
+
+  @property
+  def sid(self):
+    return binascii.hexlify(self.__sid)
+
+  @sid.setter
+  def sid(self, val):
+    self.__sid = binascii.unhexlify(val)
+
+  @property
+  def uid(self):
+    return binascii.hexlify(self.__uid)
+
+  @uid.setter
+  def uid(self, val):
+    self.__uid = binascii.unhexlify(val)
+
+class AuthDBException(Exception): pass
+
+class DuplicateSessionIdException(AuthDBException): pass
 
 class AuthDB(object):
   def writeUser(self, username): pass

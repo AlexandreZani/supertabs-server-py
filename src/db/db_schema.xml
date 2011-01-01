@@ -10,7 +10,6 @@
     
   <table name="Sessions">
     <field name="SessionId" indexed="true" unique="true" type="VARCHAR(255)" />
-    <field name="IP" type="VARCHAR(255)" />
     <field name="UserId" type="VARCHAR(255)" />
     <field name="LastTouched" type="BIGINT" />
   </table>

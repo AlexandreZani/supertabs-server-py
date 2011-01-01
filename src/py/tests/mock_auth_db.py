@@ -19,6 +19,7 @@ from supertabs.auth_db import *
 class MockAuthDB(AuthDB):
   def __init__(self):
     self.users = []
+    self.sessions = []
 
   def writeUser(self, user):
     self.deleteUser(user.username)
@@ -38,3 +39,20 @@ class MockAuthDB(AuthDB):
 
     return False
 
+  def writeSession(self, session):
+    if None != self.getSession(session.sid):
+      raise DuplicateSessionIdException()
+    self.sessions.append(session)
+
+  def getSession(self, sid):
+    for session in self.sessions:
+      if session.sid == sid:
+        return session.clone()
+    return None
+
+  def deleteSession(self, sid):
+    for session in self.sessions:
+      if session.sid == sid:
+        self.sessions.remove(session)
+        return True
+    return False

@@ -68,6 +68,34 @@ class TestUser(object):
     assert user.checkPassword("new_pass")
     assert uid == user.getUserId("new_pass")
 
+class TestSession(object):
+  def test_createSession(self):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+
+    session = Session(uid)
+
+    assert uid == session.uid
+
+  def test_createSessionCopy(self):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    sid = "9d0153eb9280dcd5dac53a032743e43634c6e38ac7ad96160ca22490aec33e1c"
+    last_touched = 12345
+
+    session = Session(uid, sid, last_touched)
+
+    assert uid == session.uid
+    assert sid == session.sid
+    assert last_touched == session.last_touched
+
+  def test_clone(self):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    sid = "9d0153eb9280dcd5dac53a032743e43634c6e38ac7ad96160ca22490aec33e1c"
+    last_touched = 12345
+
+    session = Session(uid, sid, last_touched)
+
+    assert session == session.clone()
+
 def pytest_generate_tests(metafunc):
   if 'db' in metafunc.funcargnames:
     metafunc.addcall(param=1)
@@ -114,3 +142,58 @@ class TestAuthDB(object):
     user2 = db.getUser("username")
 
     assert None == user2
+
+  def test_writeSession(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    sid = "9d0153eb9280dcd5dac53a032743e43634c6e38ac7ad96160ca22490aec33e1c"
+    last_touched = 12345
+
+    session = Session(uid, sid, last_touched)
+
+    db.writeSession(session)
+
+    session2 = db.getSession(sid)
+
+    assert session == session2
+
+  def test_writeSessionAgain(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    sid = "9d0153eb9280dcd5dac53a032743e43634c6e38ac7ad96160ca22490aec33e1c"
+    last_touched = 12345
+
+    session = Session(uid, sid, last_touched)
+
+    db.writeSession(session)
+
+    try:
+      db.writeSession(session)
+    except DuplicateSessionIdException:
+      assert True
+    else:
+      assert False
+
+  def test_getSessionNone(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    sid = "9d0153eb9280dcd5dac53a032743e43634c6e38ac7ad96160ca22490aec33e1c"
+    last_touched = 12345
+
+    session = Session(uid, sid, last_touched)
+    db.writeSession(session)
+
+    session2 = db.getSession(uid)
+    
+    assert None == session2
+
+  def test_deleteSession(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    sid = "9d0153eb9280dcd5dac53a032743e43634c6e38ac7ad96160ca22490aec33e1c"
+    last_touched = 12345
+
+    session = Session(uid, sid, last_touched)
+    db.writeSession(session)
+
+    db.deleteSession(sid)
+
+    session2 = db.getSession(sid)
+    
+    assert None == session2
