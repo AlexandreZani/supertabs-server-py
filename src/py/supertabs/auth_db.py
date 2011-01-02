@@ -18,6 +18,8 @@ import hashlib
 import os
 import binascii
 import time
+from sqlalchemy import *
+from sqlalchemy.exc import IntegrityError
 
 class User(object):
   def __init__(self, uid, username, password, uid_salt = None, password_salt = None):
@@ -184,3 +186,116 @@ class AuthDB(object):
   def writeUser(self, username): pass
   def getUser(self, username): pass
   def deleteUser(self, username): pass
+  def writeSession(self, session): pass
+  def getSession(self, sid): pass
+  def deleteSession(self, sid): pass
+
+class SQLAlchemyAuthDB(AuthDB):
+  def __init__(self, db):
+    self.db_engine = db
+
+  def getConn(self):
+    return self.db_engine.connect()
+
+  def writeUser(self, user):
+    self.deleteUser(user.username)
+    conn = self.getConn()
+    metadata = MetaData(conn)
+
+    users = Table('Users', metadata, autoload=True)
+
+    stmt = users.insert().values(UserName=user.username,
+        SaltedPassword=user.salted_password, PasswordSalt=user.password_salt,
+        EncryptedUserId=user.encrypted_uid, UserIdSalt=user.uid_salt)
+
+    result = conn.execute(stmt)
+
+    conn.close()
+
+  def getUser(self, username):
+    conn = self.getConn()
+    metadata = MetaData(conn)
+
+    users = Table('Users', metadata, autoload=True)
+
+    stmt = users.select().where(users.c.UserName==username)
+
+    result = conn.execute(stmt)
+
+    row = result.fetchone()
+
+    conn.close()
+
+    if not row:
+      return None
+
+    return User(row.EncryptedUserId, row.UserName, row.SaltedPassword,
+        row.UserIdSalt, row.PasswordSalt)
+
+  def deleteUser(self, username):
+    conn = self.getConn()
+    metadata = MetaData(conn)
+
+    users = Table('Users', metadata, autoload=True)
+
+    stmt = users.delete().where(users.c.UserName==username)
+
+    result = conn.execute(stmt)
+
+    conn.close()
+
+    if result.rowcount > 0:
+      return True
+    return False
+
+  def writeSession(self, session):
+    conn = self.getConn()
+    metadata = MetaData(conn)
+
+    sessions = Table('Sessions', metadata, autoload=True)
+
+    stmt = sessions.insert().values(SessionId=session.sid, UserId=session.uid,
+        LastTouched=session.last_touched)
+
+    try:
+      result = conn.execute(stmt)
+    except IntegrityError:
+      raise DuplicateSessionIdException
+
+    conn.close()
+
+  def getSession(self, sid):
+    conn = self.getConn()
+    metadata = MetaData(conn)
+
+    sessions = Table('Sessions', metadata, autoload=True)
+
+    stmt = sessions.select().where(sessions.c.SessionId==sid)
+
+    result = conn.execute(stmt)
+
+    row = result.fetchone()
+
+    conn.close()
+
+    if not row:
+      return None
+
+    return Session(row.UserId, row.SessionId, row.LastTouched)
+
+  def deleteSession(self, sid):
+    conn = self.getConn()
+    metadata = MetaData(conn)
+
+    sessions = Table('Sessions', metadata, autoload=True)
+
+    stmt = sessions.delete().where(sessions.c.SessionId==sid)
+
+    result = conn.execute(stmt)
+
+    conn.close()
+
+    if result.rowcount > 0:
+      return True
+
+    return False

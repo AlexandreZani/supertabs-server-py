@@ -19,6 +19,16 @@ from tests.mock_auth_db import *
 import binascii
 
 class TestUser(object):
+  def test_badUserId(self):
+    uid = "fwcd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+
+    try:
+      user = User(uid, "username", "password")
+    except TypeError:
+      assert True
+    else:
+      assert False
+
   def test_passwordCheck(self):
     uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
     user = User(uid, "username", "password")
@@ -105,10 +115,20 @@ class TestSession(object):
 def pytest_generate_tests(metafunc):
   if 'db' in metafunc.funcargnames:
     metafunc.addcall(param=1)
+    metafunc.addcall(param=2)
 
 def pytest_funcarg__db(request):
   if request.param == 1:
     return MockAuthDB()
+  if request.param == 2:
+    db = create_engine("mysql://test:password@localhost/SupertabsDB")
+    metadata = MetaData(db)
+    users = Table('Users', metadata, autoload=True)
+    users.delete().execute()
+    sessions = Table('Sessions', metadata, autoload=True)
+    sessions.delete().execute()
+    return SQLAlchemyAuthDB(db)
+
 
 class TestAuthDB(object):
   def test_writeUser(self, db):
