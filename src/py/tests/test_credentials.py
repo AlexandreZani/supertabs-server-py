@@ -113,3 +113,55 @@ class TestUsernamePasswordCreds(object):
       assert True
     else:
       assert False
+
+class TestSessionCreds(object):
+  def test_normalOp(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    session = Session(uid)
+
+    db.writeSession(session)
+
+    method = "SessionId"
+    args = {"sid" : session.sid}
+
+    creds = CredentialsFactory.getCredentials(method, args, db)
+
+    assert creds.validateCredentials()
+    assert uid == creds.uid
+
+  def test_wrongSid(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    session = Session(uid)
+
+    db.writeSession(session)
+
+    method = "SessionId"
+    args = {"sid" : "123456"}
+
+    creds = CredentialsFactory.getCredentials(method, args, db)
+
+    try:
+      creds.validateCredentials()
+    except InvalidCredentials:
+      assert True
+    else:
+      assert False
+
+  def test_expiredSession(self, db):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    session = Session(uid)
+    session.last_touched -= 60*61*24
+
+    db.writeSession(session)
+
+    method = "SessionId"
+    args = {"sid" : session.sid}
+
+    creds = CredentialsFactory.getCredentials(method, args, db)
+
+    try:
+      creds.validateCredentials()
+    except InvalidCredentials:
+      assert True
+    else:
+      assert False

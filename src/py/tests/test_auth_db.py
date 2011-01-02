@@ -103,6 +103,19 @@ class TestSession(object):
     assert sid == session.sid
     assert last_touched == session.last_touched
 
+  def test_createSessionCopy(self):
+    uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+
+    session = Session(uid)
+
+    last_touched = session.last_touched
+
+    time.sleep(1)
+
+    session.touch()
+
+    assert session.last_touched > last_touched
+
   def test_clone(self):
     uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
     sid = "9d0153eb9280dcd5dac53a032743e43634c6e38ac7ad96160ca22490aec33e1c"

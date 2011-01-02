@@ -15,11 +15,13 @@
 #   limitations under the License.
 
 from pod.credentials import *
+import time
 
 class UsernamePasswordCredentials(Credentials):
   CREDENTIALS_TYPE = "UsernamePassword"
   def __init__(self, args, db):
     try:
+      self.db = db
       self.username = args["username"]
       self.password = args["password"]
 
@@ -38,3 +40,29 @@ class UsernamePasswordCredentials(Credentials):
     return True
 
 CredentialsFactory.registerCredentialsType(UsernamePasswordCredentials)
+
+class SessionIdCredentials(Credentials):
+  CREDENTIALS_TYPE = "SessionId"
+
+  def __init__(self, args, db):
+    try:
+      self.db = db
+      self.sid = args["sid"]
+
+      self.session = db.getSession(self.sid)
+      self.uid = self.session.uid
+    except Exception:
+      self.invalid = True
+    else:
+      self.invalid = False
+
+  def validateCredentials(self):
+    if self.invalid or time.time() - self.session.last_touched > 60*60*24:
+      raise InvalidCredentials()
+    self.session.touch()
+    self.db.deleteSession(self.session.sid)
+    self.db.writeSession(self.session)
+    return True
+
+CredentialsFactory.registerCredentialsType(SessionIdCredentials)
+

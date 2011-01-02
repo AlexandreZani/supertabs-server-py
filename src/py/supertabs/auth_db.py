@@ -142,6 +142,9 @@ class Session(object):
   def clone(self):
     return Session(self.uid, self.sid, self.last_touched)
 
+  def touch(self):
+    self.last_touched = time.time()
+
   def __eq__(self, right):
     try:
       b = (self.uid == right.uid and self.sid == right.sid and
