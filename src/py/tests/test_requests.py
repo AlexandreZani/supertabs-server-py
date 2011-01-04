@@ -53,9 +53,264 @@ class TestLoginRequest(object):
 
     assert 256/8*2 == len(response["credentials"]["args"]["sid"])
 
+class TestGetAllTabsRequest(object):
+  def test_normalOp(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
 
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
 
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
 
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
 
+    sdb.writeTab(SupertabTab(uid, 0, 0, "url00"))
+    sdb.writeTab(SupertabTab(uid, 0, 1, "url01"))
+    sdb.writeTab(SupertabTab(uid, 0, 2, "url02"))
 
+    sdb.writeTab(SupertabTab(uid, 1, 0, "url10"))
+    sdb.writeTab(SupertabTab(uid, 1, 1, "url11"))
+    sdb.writeTab(SupertabTab(uid, 1, 2, "url12"))
 
+    request = RequestFactory.getRequest("GetAllTabs", {}, creds)
+    response = request.execute(sdb)
+
+    test_table = [["" for c in range(3)] for r in range(2)]
+
+    for s in response["response"]["supertabs"]:
+      for t in s["tabs"]:
+        test_table[s["id"]][t["id"]] = t["url"]
+    
+    for s in range(2):
+      for t in range(3):
+        assert "url" + str(s) + str(t) == test_table[s][t]
+
+class TestUpdateTab(object):
+  def test_normalOp(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    method = "UpdateTab"
+    args = { "supertab_id" : 0, "tab_id" : 1, "url" : "http" }
+
+    request = RequestFactory.getRequest(method, args, creds)
+    response = request.execute(sdb)
+
+    tab = SupertabTab(uid, 0, 1, "http")
+
+    tab2 = sdb.getTab(uid, 0, 1)
+
+    assert tab == tab2
+
+  def test_noSuperTabId(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    method = "UpdateTab"
+    args = { "tab_id" : 1, "url" : "http" }
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+
+      response = request.execute(sdb)
+    except MissingRequestArgument:
+      assert True
+    else:
+      assert False
+
+  def test_noTabId(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    method = "UpdateTab"
+    args = { "supertab_id" : 1, "url" : "http" }
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+
+      response = request.execute(sdb)
+    except MissingRequestArgument:
+      assert True
+    else:
+      assert False
+
+  def test_noUrl(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    method = "UpdateTab"
+    args = { "supertab_id" : 0, "tab_id" : 1 }
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+
+      response = request.execute(sdb)
+    except MissingRequestArgument:
+      assert True
+    else:
+      assert False
+
+class TestDeleteTab(object):
+  def test_normalOp(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    tab = SupertabTab(uid, 0, 1, "http")
+    sdb.writeTab(tab)
+
+    method = "DeleteTab"
+    args = { "supertab_id" : tab.supertab_id, "tab_id" : tab.tab_id }
+
+    request = RequestFactory.getRequest(method, args, creds)
+    response = request.execute(sdb)
+
+    tab2 = sdb.getTab(uid, 0, 1)
+
+    assert None == tab2
+
+  def test_noSupertabId(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    tab = SupertabTab(uid, 0, 1, "http")
+    sdb.writeTab(tab)
+
+    method = "DeleteTab"
+    args = { "tab_id" : tab.tab_id }
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+      response = request.execute(sdb)
+    except MissingRequestArgument:
+      assert True
+    else:
+      assert False
+
+  def test_noTabId(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    tab = SupertabTab(uid, 0, 1, "http")
+    sdb.writeTab(tab)
+
+    method = "DeleteTab"
+    args = { "supertab_id" : tab.supertab_id }
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+      response = request.execute(sdb)
+    except MissingRequestArgument:
+      assert True
+    else:
+      assert False
+
+  def test_noArgs(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    tab = SupertabTab(uid, 0, 1, "http")
+    sdb.writeTab(tab)
+
+    method = "DeleteTab"
+    args = {}
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+      response = request.execute(sdb)
+    except MissingRequestArgument:
+      assert True
+    else:
+      assert False

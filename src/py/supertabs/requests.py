@@ -34,3 +34,73 @@ class LoginRequest(Request):
           "args" : { "sid" : session.sid } } }
 
 RequestFactory.registerRequestType(LoginRequest)
+
+class GetAllTabsRequest(Request):
+  REQUEST_TYPE = "GetAllTabs"
+  def __init__(self, args, credentials):
+    self.credentials = credentials
+
+  def execute(self, db):
+    self.credentials.validateCredentials()
+    tabs = db.getAllTabs(self.credentials.uid)
+
+    tabs_table = {}
+
+    for tab in tabs:
+      try:
+        tabs_table[tab.supertab_id].append(tab)
+      except KeyError:
+        tabs_table[tab.supertab_id] = [tab]
+
+    result =  { "response" : {
+      "supertabs" : [] } }
+
+    for k in tabs_table:
+      s = tabs_table[k]
+      supertab = { "id" : k, "tabs" : [] }
+      for t in s:
+        supertab["tabs"].append({ "id" : t.tab_id, "url" : t.url })
+      result["response"]["supertabs"].append(supertab)
+
+    return result
+
+RequestFactory.registerRequestType(GetAllTabsRequest)
+
+class UpdateTabRequest(Request):
+  REQUEST_TYPE = "UpdateTab"
+  def __init__(self, args, credentials):
+    self.credentials = credentials
+
+    try:
+      self.tab_id = args["tab_id"]
+      self.supertab_id = args["supertab_id"]
+      self.url = args["url"]
+    except KeyError:
+      raise MissingRequestArgument()
+
+  def execute(self, db):
+    self.credentials.validateCredentials()
+
+    tab = SupertabTab(self.credentials.uid, self.supertab_id, self.tab_id,
+        self.url)
+
+    db.writeTab(tab)
+
+RequestFactory.registerRequestType(UpdateTabRequest)
+
+class DeleteTabRequest(Request):
+  REQUEST_TYPE = "DeleteTab"
+  def __init__(self, args, credentials):
+    self.credentials = credentials
+    try:
+      self.supertab_id = args["supertab_id"]
+      self.tab_id = args["tab_id"]
+    except KeyError:
+      raise MissingRequestArgument()
+
+  def execute(self, db):
+    self.credentials.validateCredentials()
+
+    db.deleteTab(self.credentials.uid, self.supertab_id, self.tab_id)
+
+RequestFactory.registerRequestType(DeleteTabRequest)
