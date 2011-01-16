@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-#   Copyright 2010 Alexandre Zani (alexandre.zani@gmail.com) 
+#   Copyright 2010-2011 Alexandre Zani (alexandre.zani@gmail.com) 
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -311,6 +311,137 @@ class TestDeleteTab(object):
       request = RequestFactory.getRequest(method, args, creds)
       response = request.execute(sdb)
     except MissingRequestArgument:
+      assert True
+    else:
+      assert False
+
+class TestPushTabs(object):
+  def test_normalOp(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    method = "PushAllTabs"
+    args = { "supertabs" : [
+      { "id" : 0, "tabs" : [
+        { "id" : 0, "url" : "urla" },
+        { "id" : 1, "url" : "urlb" },
+        { "id" : 2, "url" : "urlc" } ]},
+      { "id" : 1, "tabs" : [
+        { "id" : 0, "url" : "url0" },
+        { "id" : 1, "url" : "url1" },
+        { "id" : 2, "url" : "url2" } ]} ]}
+
+    request = RequestFactory.getRequest(method, args, creds)
+    response = request.execute(sdb)
+
+    assert "urla" == sdb.getTab(uid, 0, 0).url
+    assert "urlb" == sdb.getTab(uid, 0, 1).url
+    assert "urlc" == sdb.getTab(uid, 0, 2).url
+    assert "url0" == sdb.getTab(uid, 1, 0).url
+    assert "url1" == sdb.getTab(uid, 1, 1).url
+    assert "url2" == sdb.getTab(uid, 1, 2).url
+
+  def test_noArgs(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    method = "PushAllTabs"
+    args = {}
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+      response = request.execute(sdb)
+    except MissingRequestArgument:
+      assert True
+    else:
+      assert False
+
+  def test_MalformedSupertab(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    method = "PushAllTabs"
+    args = { "supertabs" : [
+      { "tabs" : [
+        { "id" : 0, "url" : "urla" },
+        { "id" : 1, "url" : "urlb" },
+        { "id" : 2, "url" : "urlc" } ]},
+      { "id" : 1, "tabs" : [
+        { "id" : 0, "url" : "url0" },
+        { "id" : 1, "url" : "url1" },
+        { "id" : 2, "url" : "url2" } ]} ]}
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+      response = request.execute(sdb)
+    except MalformedRequest:
+      assert True
+    else:
+      assert False
+
+  def test_MalformedTab(self):
+    sdb = MockSupertabsDB()
+    adb = MockAuthDB()
+
+    username = "username"
+    password = "password"
+    uid = "facd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
+    user = User(uid, username, password)
+    adb.writeUser(user)
+
+    cred_args = {"username" : username, "password" : password}
+    cred_type = "UsernamePassword"
+
+    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+
+    method = "PushAllTabs"
+    args = { "supertabs" : [
+      { "id" : 0, "tabs" : [
+        { "id" : 0, "url" : "urla" },
+        { "id" : 1, "url" : "urlb" },
+        { "id" : 2, "url" : "urlc" } ]},
+      { "id" : 1, "tabs" : [
+        { "url" : "url0" },
+        { "id" : 1, "url" : "url1" },
+        { "id" : 2, "url" : "url2" } ]} ]}
+
+    try:
+      request = RequestFactory.getRequest(method, args, creds)
+      response = request.execute(sdb)
+    except MalformedRequest:
       assert True
     else:
       assert False

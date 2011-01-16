@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-#   Copyright 2010 Alexandre Zani (alexandre.zani@gmail.com) 
+#   Copyright 2010-2011 Alexandre Zani (alexandre.zani@gmail.com) 
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -104,3 +104,26 @@ class DeleteTabRequest(Request):
     db.deleteTab(self.credentials.uid, self.supertab_id, self.tab_id)
 
 RequestFactory.registerRequestType(DeleteTabRequest)
+
+class PushAllTabsRequest(Request):
+  REQUEST_TYPE = "PushAllTabs"
+  def __init__(self, args, credentials):
+    self.credentials = credentials
+
+    try:
+      self.supertabs = args["supertabs"]
+    except KeyError:
+      raise MissingRequestArgument("supertabs")
+  
+  def execute(self, db):
+    self.credentials.validateCredentials()
+
+    try:
+      for s in self.supertabs:
+        for t in s["tabs"]:
+          db.writeTab(SupertabTab(self.credentials.uid, s["id"], t["id"], t["url"]))
+    except KeyError:
+      raise MalformedRequest()
+
+RequestFactory.registerRequestType(PushAllTabsRequest)
+
