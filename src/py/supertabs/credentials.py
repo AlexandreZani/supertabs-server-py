@@ -17,6 +17,8 @@
 from pod.credentials import *
 import time
 
+credentials_factory = CredentialsFactory()
+
 class UsernamePasswordCredentials(Credentials):
   CREDENTIALS_TYPE = "UsernamePassword"
   def __init__(self, args, db):
@@ -39,7 +41,7 @@ class UsernamePasswordCredentials(Credentials):
 
     return True
 
-CredentialsFactory.registerCredentialsType(UsernamePasswordCredentials)
+credentials_factory.registerCredentialsType(UsernamePasswordCredentials)
 
 class SessionIdCredentials(Credentials):
   CREDENTIALS_TYPE = "SessionId"
@@ -64,5 +66,5 @@ class SessionIdCredentials(Credentials):
     self.db.writeSession(self.session)
     return True
 
-CredentialsFactory.registerCredentialsType(SessionIdCredentials)
+credentials_factory.registerCredentialsType(SessionIdCredentials)
 

@@ -19,6 +19,8 @@ from supertabs.auth_db import *
 from supertabs.supertabs_db import *
 from supertabs.credentials import *
 
+request_factory = RequestFactory()
+
 class LoginRequest(Request):
   REQUEST_TYPE = "Login"
   def __init__(self, args, credentials):
@@ -33,7 +35,7 @@ class LoginRequest(Request):
           "type" : SessionIdCredentials.CREDENTIALS_TYPE,
           "args" : { "sid" : session.sid } } }
 
-RequestFactory.registerRequestType(LoginRequest)
+request_factory.registerRequestType(LoginRequest)
 
 class GetAllTabsRequest(Request):
   REQUEST_TYPE = "GetAllTabs"
@@ -64,7 +66,7 @@ class GetAllTabsRequest(Request):
 
     return result
 
-RequestFactory.registerRequestType(GetAllTabsRequest)
+request_factory.registerRequestType(GetAllTabsRequest)
 
 class UpdateTabRequest(Request):
   REQUEST_TYPE = "UpdateTab"
@@ -86,7 +88,7 @@ class UpdateTabRequest(Request):
 
     db.writeTab(tab)
 
-RequestFactory.registerRequestType(UpdateTabRequest)
+request_factory.registerRequestType(UpdateTabRequest)
 
 class DeleteTabRequest(Request):
   REQUEST_TYPE = "DeleteTab"
@@ -103,7 +105,7 @@ class DeleteTabRequest(Request):
 
     db.deleteTab(self.credentials.uid, self.supertab_id, self.tab_id)
 
-RequestFactory.registerRequestType(DeleteTabRequest)
+request_factory.registerRequestType(DeleteTabRequest)
 
 class PushAllTabsRequest(Request):
   REQUEST_TYPE = "PushAllTabs"
@@ -125,5 +127,5 @@ class PushAllTabsRequest(Request):
     except KeyError:
       raise MalformedRequest()
 
-RequestFactory.registerRequestType(PushAllTabsRequest)
+request_factory.registerRequestType(PushAllTabsRequest)
 

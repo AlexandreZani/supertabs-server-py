@@ -45,9 +45,9 @@ class TestLoginRequest(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
-    request = RequestFactory.getRequest("Login", {}, creds)
+    request = request_factory.getRequest("Login", {}, creds)
 
     response = request.execute(sdb)
 
@@ -67,7 +67,7 @@ class TestGetAllTabsRequest(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     sdb.writeTab(SupertabTab(uid, 0, 0, "url00"))
     sdb.writeTab(SupertabTab(uid, 0, 1, "url01"))
@@ -77,7 +77,7 @@ class TestGetAllTabsRequest(object):
     sdb.writeTab(SupertabTab(uid, 1, 1, "url11"))
     sdb.writeTab(SupertabTab(uid, 1, 2, "url12"))
 
-    request = RequestFactory.getRequest("GetAllTabs", {}, creds)
+    request = request_factory.getRequest("GetAllTabs", {}, creds)
     response = request.execute(sdb)
 
     test_table = [["" for c in range(3)] for r in range(2)]
@@ -104,12 +104,12 @@ class TestUpdateTab(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     method = "UpdateTab"
     args = { "supertab_id" : 0, "tab_id" : 1, "url" : "http" }
 
-    request = RequestFactory.getRequest(method, args, creds)
+    request = request_factory.getRequest(method, args, creds)
     response = request.execute(sdb)
 
     tab = SupertabTab(uid, 0, 1, "http")
@@ -131,13 +131,13 @@ class TestUpdateTab(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     method = "UpdateTab"
     args = { "tab_id" : 1, "url" : "http" }
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
 
       response = request.execute(sdb)
     except MissingRequestArgument:
@@ -158,13 +158,13 @@ class TestUpdateTab(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     method = "UpdateTab"
     args = { "supertab_id" : 1, "url" : "http" }
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
 
       response = request.execute(sdb)
     except MissingRequestArgument:
@@ -185,13 +185,13 @@ class TestUpdateTab(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     method = "UpdateTab"
     args = { "supertab_id" : 0, "tab_id" : 1 }
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
 
       response = request.execute(sdb)
     except MissingRequestArgument:
@@ -213,7 +213,7 @@ class TestDeleteTab(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     tab = SupertabTab(uid, 0, 1, "http")
     sdb.writeTab(tab)
@@ -221,7 +221,7 @@ class TestDeleteTab(object):
     method = "DeleteTab"
     args = { "supertab_id" : tab.supertab_id, "tab_id" : tab.tab_id }
 
-    request = RequestFactory.getRequest(method, args, creds)
+    request = request_factory.getRequest(method, args, creds)
     response = request.execute(sdb)
 
     tab2 = sdb.getTab(uid, 0, 1)
@@ -241,7 +241,7 @@ class TestDeleteTab(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     tab = SupertabTab(uid, 0, 1, "http")
     sdb.writeTab(tab)
@@ -250,7 +250,7 @@ class TestDeleteTab(object):
     args = { "tab_id" : tab.tab_id }
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
       response = request.execute(sdb)
     except MissingRequestArgument:
       assert True
@@ -270,7 +270,7 @@ class TestDeleteTab(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     tab = SupertabTab(uid, 0, 1, "http")
     sdb.writeTab(tab)
@@ -279,7 +279,7 @@ class TestDeleteTab(object):
     args = { "supertab_id" : tab.supertab_id }
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
       response = request.execute(sdb)
     except MissingRequestArgument:
       assert True
@@ -299,7 +299,7 @@ class TestDeleteTab(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     tab = SupertabTab(uid, 0, 1, "http")
     sdb.writeTab(tab)
@@ -308,7 +308,7 @@ class TestDeleteTab(object):
     args = {}
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
       response = request.execute(sdb)
     except MissingRequestArgument:
       assert True
@@ -329,7 +329,7 @@ class TestPushTabs(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     method = "PushAllTabs"
     args = { "supertabs" : [
@@ -342,7 +342,7 @@ class TestPushTabs(object):
         { "id" : 1, "url" : "url1" },
         { "id" : 2, "url" : "url2" } ]} ]}
 
-    request = RequestFactory.getRequest(method, args, creds)
+    request = request_factory.getRequest(method, args, creds)
     response = request.execute(sdb)
 
     assert "urla" == sdb.getTab(uid, 0, 0).url
@@ -365,13 +365,13 @@ class TestPushTabs(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     method = "PushAllTabs"
     args = {}
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
       response = request.execute(sdb)
     except MissingRequestArgument:
       assert True
@@ -391,7 +391,7 @@ class TestPushTabs(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     method = "PushAllTabs"
     args = { "supertabs" : [
@@ -405,7 +405,7 @@ class TestPushTabs(object):
         { "id" : 2, "url" : "url2" } ]} ]}
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
       response = request.execute(sdb)
     except MalformedRequest:
       assert True
@@ -425,7 +425,7 @@ class TestPushTabs(object):
     cred_args = {"username" : username, "password" : password}
     cred_type = "UsernamePassword"
 
-    creds = CredentialsFactory.getCredentials(cred_type, cred_args, adb)
+    creds = credentials_factory.getCredentials(cred_type, cred_args, adb)
 
     method = "PushAllTabs"
     args = { "supertabs" : [
@@ -439,7 +439,7 @@ class TestPushTabs(object):
         { "id" : 2, "url" : "url2" } ]} ]}
 
     try:
-      request = RequestFactory.getRequest(method, args, creds)
+      request = request_factory.getRequest(method, args, creds)
       response = request.execute(sdb)
     except MalformedRequest:
       assert True

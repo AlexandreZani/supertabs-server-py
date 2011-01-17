@@ -36,7 +36,7 @@ class TestUsernamePasswordCreds(object):
     args = {"username":"username",
         "password":"password"}
 
-    creds = CredentialsFactory.getCredentials(method, args, db)
+    creds = credentials_factory.getCredentials(method, args, db)
 
     assert creds.validateCredentials()
 
@@ -50,7 +50,7 @@ class TestUsernamePasswordCreds(object):
     args = {"username":"username",
         "password":"pasadssword"}
 
-    creds = CredentialsFactory.getCredentials(method, args, db)
+    creds = credentials_factory.getCredentials(method, args, db)
 
     try:
       creds.validateCredentials()
@@ -68,7 +68,7 @@ class TestUsernamePasswordCreds(object):
     method = "UsernamePassword"
     args = {"username":"username"}
 
-    creds = CredentialsFactory.getCredentials(method, args, db)
+    creds = credentials_factory.getCredentials(method, args, db)
 
     try:
       creds.validateCredentials()
@@ -87,7 +87,7 @@ class TestUsernamePasswordCreds(object):
     args = {"username":"usesdasdrname",
         "password":"password"}
 
-    creds = CredentialsFactory.getCredentials(method, args, db)
+    creds = credentials_factory.getCredentials(method, args, db)
 
     try:
       creds.validateCredentials()
@@ -105,7 +105,7 @@ class TestUsernamePasswordCreds(object):
     method = "UsernamePassword"
     args = {"password":"password"}
 
-    creds = CredentialsFactory.getCredentials(method, args, db)
+    creds = credentials_factory.getCredentials(method, args, db)
 
     try:
       creds.validateCredentials()
@@ -124,7 +124,7 @@ class TestSessionCreds(object):
     method = "SessionId"
     args = {"sid" : session.sid}
 
-    creds = CredentialsFactory.getCredentials(method, args, db)
+    creds = credentials_factory.getCredentials(method, args, db)
 
     assert creds.validateCredentials()
     assert uid == creds.uid
@@ -138,7 +138,7 @@ class TestSessionCreds(object):
     method = "SessionId"
     args = {"sid" : "123456"}
 
-    creds = CredentialsFactory.getCredentials(method, args, db)
+    creds = credentials_factory.getCredentials(method, args, db)
 
     try:
       creds.validateCredentials()
@@ -157,7 +157,7 @@ class TestSessionCreds(object):
     method = "SessionId"
     args = {"sid" : session.sid}
 
-    creds = CredentialsFactory.getCredentials(method, args, db)
+    creds = credentials_factory.getCredentials(method, args, db)
 
     try:
       creds.validateCredentials()
