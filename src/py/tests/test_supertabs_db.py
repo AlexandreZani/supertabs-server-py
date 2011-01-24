@@ -21,15 +21,19 @@ def pytest_generate_tests(metafunc):
   if 'db' in metafunc.funcargnames:
     metafunc.addcall(param=1)
     metafunc.addcall(param=2)
+    metafunc.addcall(param=3)
 
 def pytest_funcarg__db(request):
   if request.param == 1:
     return MockSupertabsDB()
-  if request.param == 2:
+  elif request.param == 2:
     db = create_engine("mysql://test:password@localhost/SupertabsDB")
     metadata = MetaData(db)
     tabs_table = Table('Tabs', metadata, autoload=True)
     tabs_table.delete().execute()
+    return SQLAlchemySupertabsDB(db)
+  elif request.param == 3:
+    db = create_engine('sqlite:///:memory:')
     return SQLAlchemySupertabsDB(db)
 
 class TestDatabase(object):

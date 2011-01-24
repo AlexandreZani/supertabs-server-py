@@ -44,6 +44,15 @@ class SupertabsDB(object):
 class SQLAlchemySupertabsDB(SupertabsDB):
   def __init__(self, db):
     self.db_engine = db
+    metadata = MetaData()
+    tabs_table = Table('Tabs', metadata,
+        Column('UserId', String(255)),
+        Column('TabId', Integer),
+        Column('SupertabId', Integer),
+        Column('Url', String(255))
+        )
+
+    metadata.create_all(self.db_engine)
 
   def getConn(self):
     return self.db_engine.connect()
