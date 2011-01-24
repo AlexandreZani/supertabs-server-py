@@ -134,7 +134,7 @@ def pytest_generate_tests(metafunc):
 def pytest_funcarg__db(request):
   if request.param == 1:
     return MockAuthDB()
-  if request.param == 2:
+  elif request.param == 2:
     db = create_engine("mysql://test:password@localhost/SupertabsDB")
     metadata = MetaData(db)
     users = Table('Users', metadata, autoload=True)
@@ -142,7 +142,7 @@ def pytest_funcarg__db(request):
     sessions = Table('Sessions', metadata, autoload=True)
     sessions.delete().execute()
     return SQLAlchemyAuthDB(db)
-  if request.param == 3:
+  elif request.param == 3:
     db = create_engine('sqlite:///:memory:')
     return SQLAlchemyAuthDB(db)
 
