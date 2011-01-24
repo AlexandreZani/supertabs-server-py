@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-#   Copyright 2010 Alexandre Zani (alexandre.zani@gmail.com) 
+#   Copyright 2010-2011 Alexandre Zani (alexandre.zani@gmail.com) 
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -129,6 +129,7 @@ def pytest_generate_tests(metafunc):
   if 'db' in metafunc.funcargnames:
     metafunc.addcall(param=1)
     metafunc.addcall(param=2)
+    metafunc.addcall(param=3)
 
 def pytest_funcarg__db(request):
   if request.param == 1:
@@ -140,6 +141,9 @@ def pytest_funcarg__db(request):
     users.delete().execute()
     sessions = Table('Sessions', metadata, autoload=True)
     sessions.delete().execute()
+    return SQLAlchemyAuthDB(db)
+  if request.param == 3:
+    db = create_engine('sqlite:///:memory:')
     return SQLAlchemyAuthDB(db)
 
 

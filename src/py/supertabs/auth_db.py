@@ -196,6 +196,23 @@ class AuthDB(object):
 class SQLAlchemyAuthDB(AuthDB):
   def __init__(self, db):
     self.db_engine = db
+    metadata = MetaData()
+    users = Table('Users', metadata,
+        Column('UserName', String(255), unique=True),
+        Column('SaltedPassword', String(255)),
+        Column('PasswordSalt', String(255)),
+        Column('EncryptedUserId', String(255)),
+        Column('UserIdSalt', String(255))
+        )
+
+    sessions = Table('Sessions', metadata,
+        Column('SessionId', String(255), unique=True),
+        Column('UserId', String(255)),
+        Column('LastTouched', BigInteger)
+        )
+
+    metadata.create_all(self.db_engine)
+
 
   def getConn(self):
     return self.db_engine.connect()
