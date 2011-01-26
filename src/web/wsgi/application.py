@@ -19,7 +19,7 @@ from supertabs.credentials import *
 from supertabs.auth_db import *
 from supertabs.supertabs_db import *
 import json
-from os.path import exists
+from os import path 
 import ConfigParser
 from supertabs.web.views import *
 
@@ -30,7 +30,7 @@ config_path = "/etc/supertabs/supertabs.conf"
 auth_db_url = "sqlite:///:memory:"
 supertabs_db_url = "sqlite:///:memory:"
 
-if exists(config_path):
+if path.exists(config_path):
   config = ConfigParser.RawConfigParser()
   config.readfp(open(config_path))
 
