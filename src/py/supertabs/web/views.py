@@ -42,3 +42,6 @@ def api(environ, start_response):
 
   return [response_txt]
 
+def not_found(environ, start_response):
+  start_response('404 Not Found', [('Content-type','text/html')])
+  return [environ["PATH_INFO"] + " Not Found"]

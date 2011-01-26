@@ -21,10 +21,18 @@ from supertabs.supertabs_db import *
 import json
 from os import path 
 import ConfigParser
-from supertabs.web.views import *
+from supertabs.web import views
+import re
 
 # Change this path to wherever you store your configuration file
 config_path = "/etc/supertabs/supertabs.conf"
+
+# How to handle views
+view_paths = [
+    (r"^/api/$", views.api),
+    ]
+
+view_paths = map(lambda view_path: (re.compile(view_path[0]), view_path[1]), view_paths)
 
 # Default values for configurable options
 auth_db_url = "sqlite:///:memory:"
@@ -55,7 +63,14 @@ class Application(object):
     environ["supertabs_db"] = self.supertabs_db
     environ["auth_db"] = self.auth_db
 
-    return api(environ, start_response)
+    if environ["PATH_INFO"][-1] != "/":
+      environ["PATH_INFO"] += "/"
+
+    for (regex, handler) in view_paths:
+      if regex.search(environ["PATH_INFO"]):
+        return handler(environ, start_response)
+
+    return views.not_found(environ, start_response)
 
 application = Application(auth_db_url, supertabs_db_url)
 
