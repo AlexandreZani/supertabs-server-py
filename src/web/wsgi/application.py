@@ -21,13 +21,14 @@ from supertabs.supertabs_db import *
 import json
 from os.path import exists
 import ConfigParser
+from supertabs.web.views import *
 
 # Change this path to wherever you store your configuration file
 config_path = "/etc/supertabs/supertabs.conf"
 
 # Default values for configurable options
-auth_db_url = "mysql://test:password@localhost/SupertabsDB"
-supertabs_db_url = "mysql://test:password@localhost/SupertabsDB"
+auth_db_url = "sqlite:///:memory:"
+supertabs_db_url = "sqlite:///:memory:"
 
 if exists(config_path):
   config = ConfigParser.RawConfigParser()
@@ -45,31 +46,16 @@ if exists(config_path):
   auth_db_url += "@" + config.get("auth_db", "location")
   auth_db_url += "/" + config.get("auth_db", "database")
 
-class Api(object):
+class Application(object):
   def __init__(self, auth_db, supertabs_db):
     self.auth_db = SQLAlchemyAuthDB(create_engine(auth_db))
     self.supertabs_db = SQLAlchemySupertabsDB(create_engine(supertabs_db))
 
   def __call__(self, environ, start_response):
-    try:
-      request_body_size = int(environ.get('CONTENT_LENGTH', 0))
-    except ValueError:
-      request_body_size = 0
+    environ["supertabs_db"] = self.supertabs_db
+    environ["auth_db"] = self.auth_db
 
-    request_body = environ['wsgi.input'].read(request_body_size)
+    return api(environ, start_response)
 
-    try:
-      request = request_factory.parseRequest(request_body, auth_db=self.auth_db,
-          credentials_factory=credentials_factory)
+application = Application(auth_db_url, supertabs_db_url)
 
-      response = request.execute(self.supertabs_db)
-    except RequestError or CredentialsError, (ex):
-      response = { "Error" : str(ex.__class__.__name__) }
-
-    response_txt = json.dumps(response)
-
-    start_response('200 OK', [('Content-type','application/json')])
-
-    return [response_txt]
-
-application = Api(auth_db_url, supertabs_db_url)
