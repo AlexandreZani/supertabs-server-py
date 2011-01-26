@@ -20,7 +20,6 @@ from supertabs.auth_db import *
 from supertabs.supertabs_db import *
 import json
 
-
 def api(environ, start_response):
   try:
     request_body_size = int(environ.get('CONTENT_LENGTH', 0))
@@ -31,8 +30,7 @@ def api(environ, start_response):
 
   try:
     request = request_factory.parseRequest(request_body,
-      auth_db=environ["auth_db"],
-      credentials_factory)
+      auth_db=environ["auth_db"], credentials_factory=credentials_factory)
 
     response = request.execute(environ["supertabs_db"])
   except RequestError or CredentialsError, (ex):
