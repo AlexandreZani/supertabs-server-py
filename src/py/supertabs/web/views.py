@@ -19,6 +19,13 @@ from supertabs.credentials import *
 from supertabs.auth_db import *
 from supertabs.supertabs_db import *
 import json
+from jinja2 import Environment, PackageLoader
+from cgi import parse_qs, escape
+from os import urandom
+from binascii import hexlify, unhexlify
+from sqlalchemy import *
+
+jinja_env = Environment(loader=PackageLoader('supertabs.web', 'templates'))
 
 def api(environ, start_response):
   try:
@@ -45,3 +52,32 @@ def api(environ, start_response):
 def not_found(environ, start_response):
   start_response('404 Not Found', [('Content-type','text/html')])
   return [environ["PATH_INFO"] + " Not Found"]
+
+def new_user(environ, start_response):
+  try:
+    request_body_size = int(environ.get('CONTENT_LENGTH', 0))
+  except ValueError:
+    request_body_size = 0
+
+  request_body = environ['wsgi.input'].read(request_body_size)
+
+  out_params = {}
+
+  in_params = parse_qs(request_body)
+  try:
+    out_params["username"] = in_params["username"][0]
+    
+    user = environ["auth_db"].getUser(in_params["username"][0])
+    try:
+      environ["auth_db"].newUser(in_params["username"][0], in_params["password"][0])
+      out_params["success"] = True
+    except DuplicateUsernameException:
+      out_params["duplicate_username"] = True
+  except KeyError:
+    out_params = {}
+
+
+  start_response('200 OK', [('Content-type','text/html')])
+  template = jinja_env.get_template('new_user_form.html')
+
+  return [str(template.render(out_params))]

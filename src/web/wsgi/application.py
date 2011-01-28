@@ -30,6 +30,7 @@ config_path = "/etc/supertabs/supertabs.conf"
 # How to handle views
 view_paths = [
     (r"^/api/$", views.api),
+    (r"^/new_user/$", views.new_user)
     ]
 
 view_paths = map(lambda view_path: (re.compile(view_path[0]), view_path[1]), view_paths)
