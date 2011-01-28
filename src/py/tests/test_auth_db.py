@@ -148,6 +148,25 @@ def pytest_funcarg__db(request):
 
 
 class TestAuthDB(object):
+  def test_newUser(self, db):
+    user = db.newUser("username", "password")
+
+    user2 = db.getUser("username")
+
+    assert user == user2
+
+  def test_newUserDuplicate(self, db):
+    db.newUser("username", "password")
+
+    try:
+      db.newUser("username", "passwo24rd")
+    except DuplicateUsernameException:
+      assert True
+    else:
+      assert False
+
+
+
   def test_writeUser(self, db):
     uid = "f3cd95813bfcc2c0cba45a8ee35ba166f4e47052d06e49c628d69a64c30b2b62"
     user = User(uid, "username", "password")

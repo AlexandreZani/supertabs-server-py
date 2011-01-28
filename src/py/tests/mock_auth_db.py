@@ -21,6 +21,18 @@ class MockAuthDB(AuthDB):
     self.users = []
     self.sessions = []
 
+  def newUser(self, username, password):
+    for user in self.users:
+      if user.username == username:
+        raise DuplicateUsernameException()
+
+    uid = binascii.hexlify(os.urandom(256/8))
+    user = User(uid, username, password)
+
+    self.users.append(user)
+
+    return user.clone()
+
   def writeUser(self, user):
     self.deleteUser(user.username)
     self.users.append(user.clone())

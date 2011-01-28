@@ -185,6 +185,8 @@ class AuthDBException(Exception): pass
 
 class DuplicateSessionIdException(AuthDBException): pass
 
+class DuplicateUsernameException(AuthDBException): pass
+
 class AuthDB(object):
   def writeUser(self, username): pass
   def getUser(self, username): pass
@@ -213,9 +215,31 @@ class SQLAlchemyAuthDB(AuthDB):
 
     metadata.create_all(self.db_engine)
 
-
   def getConn(self):
     return self.db_engine.connect()
+
+  def newUser(self, username, password):
+    uid = binascii.hexlify(os.urandom(256/8))
+
+    conn = self.getConn()
+    metadata = MetaData(conn)
+
+    users = Table('Users', metadata, autoload=True)
+    
+    user = User(uid, username, password)
+
+    stmt = users.insert().values(UserName=user.username,
+        SaltedPassword=user.salted_password, PasswordSalt=user.password_salt,
+        EncryptedUserId=user.encrypted_uid, UserIdSalt=user.uid_salt)
+
+    try:
+      result = conn.execute(stmt)
+    except IntegrityError:
+      raise DuplicateUsernameException()
+
+    conn.close()
+
+    return user
 
   def writeUser(self, user):
     self.deleteUser(user.username)
