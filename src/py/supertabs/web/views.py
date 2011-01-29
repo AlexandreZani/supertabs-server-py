@@ -41,7 +41,7 @@ def api(environ, start_response):
 
     response = request.execute(environ["supertabs_db"])
   except RequestError or CredentialsError, (ex):
-    response = { "Error" : str(ex.__class__.__name__) }
+    response = { "error" : str(ex.__class__.__name__) }
 
   response_txt = json.dumps(response)
 
