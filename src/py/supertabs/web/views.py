@@ -34,16 +34,19 @@ def api(environ, start_response):
     request_body_size = 0
 
   request_body = environ['wsgi.input'].read(request_body_size)
+  print "Request", request_body
 
   try:
     request = request_factory.parseRequest(request_body,
       auth_db=environ["auth_db"], credentials_factory=credentials_factory)
 
     response = request.execute(environ["supertabs_db"])
-  except RequestError or CredentialsError, (ex):
+  except (RequestError, CredentialsError), ex:
     response = { "error" : str(ex.__class__.__name__) }
 
   response_txt = json.dumps(response)
+
+  print "Response", response_txt
 
   start_response('200 OK', [('Content-type','application/json')])
 
