@@ -85,7 +85,7 @@ class User(object):
     sha256 = hashlib.sha256()
     sha256.update(password)
     sha256.update(salt)
-    return sha256.hexdigest()
+    return sha256.digest()
 
   def checkPassword(self, password):
     test_password = self.saltPassword(password, self.__password_salt)
