@@ -20,7 +20,6 @@ from tests.mock_supertabs_db import *
 def pytest_generate_tests(metafunc):
   if 'db' in metafunc.funcargnames:
     metafunc.addcall(param=1)
-    metafunc.addcall(param=2)
     metafunc.addcall(param=3)
 
 def pytest_funcarg__db(request):

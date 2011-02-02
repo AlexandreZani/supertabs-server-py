@@ -28,8 +28,12 @@ class UsernamePasswordCredentials(Credentials):
       self.password = args["password"]
 
       self.user = db.getUser(self.username)
+
+      if self.user == None:
+        raise InvalidCredentials()
+
       self.uid = self.user.getUserId("password")
-    except Exception:
+    except (KeyError,InvalidCredentials,):
       self.invalid = True
       return
     else:
