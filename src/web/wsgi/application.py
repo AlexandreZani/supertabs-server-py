@@ -36,8 +36,8 @@ view_paths = [
 view_paths = map(lambda view_path: (re.compile(view_path[0]), view_path[1]), view_paths)
 
 # Default values for configurable options
-auth_db_url = "sqlite:///:memory:"
-supertabs_db_url = "sqlite:///:memory:"
+auth_db_url = "mysql://test:password@localhost/SupertabsDB"
+supertabs_db_url = "mysql://test:password@localhost/SupertabsDB"
 
 if path.exists(config_path):
   config = ConfigParser.RawConfigParser()
@@ -57,8 +57,8 @@ if path.exists(config_path):
 
 class Application(object):
   def __init__(self, auth_db, supertabs_db):
-    self.auth_db = SQLAlchemyAuthDB(create_engine(auth_db))
-    self.supertabs_db = SQLAlchemySupertabsDB(create_engine(supertabs_db))
+    self.auth_db = SQLAlchemyAuthDB(create_engine(auth_db, pool_recycle=7200))
+    self.supertabs_db = SQLAlchemySupertabsDB(create_engine(supertabs_db, pool_recycle=7200))
 
   def __call__(self, environ, start_response):
     environ["supertabs_db"] = self.supertabs_db
